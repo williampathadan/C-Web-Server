@@ -235,7 +235,13 @@ void get_root(int fd)
  */
 void get_d20(int fd)
 {
-  // !!!! IMPLEMENT ME
+  int random = rand();
+  
+  char response_body[1024];
+
+  sprintf(response_body, "Random number generated is %d", random);
+
+  send_response(fd, "HTTP/1.1 200 OK", "text/html", response_body);
 }
 
 /**
@@ -243,6 +249,25 @@ void get_d20(int fd)
  */
 void get_date(int fd)
 {
+  time_t rawtime;
+  struct tm *info;
+
+  time(&rawtime);
+
+  info = gmtime(&rawtime );
+  
+  char dateString[1024];
+  char timeString[1024];
+
+  char response_body[1024];
+
+  sprintf(dateString, "Date: %d/%d/%d", info->tm_mon + 1, info->tm_mday, (1900 + info->tm_year));
+  sprintf(timeString, "Time: %02d:%02d:%02d", info->tm_hour, info->tm_min, info->tm_sec);
+    
+
+  sprintf(response_body, "%s\n%s", dateString, timeString);
+
+  send_response(fd, "HTTP/1.1 200 OK", "text/plain", response_body);
 
 }
 
@@ -298,6 +323,12 @@ void handle_http_request(int fd)
 
   if (!strcmp(request_path, "/")) {
     get_root(fd);
+  }
+  else if (!strcmp(request_path, "/d20")) {
+    get_d20(fd);
+  }
+  else if (!strcmp(request_path, "/date")) {
+    get_date(fd);
   }
   else {
     resp_404(fd, request_path);
